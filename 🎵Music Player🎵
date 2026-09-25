@@ -1,0 +1,1234 @@
+-- ============================================================
+-- 🎵 HENRIQUE MUSIC PLAYER 🎵
+-- Script 2026❗️
+-- 🧱by henrique☢️
+-- ============================================================
+
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+local RunService = game:GetService("RunService")
+local MarketplaceService = game:GetService("MarketplaceService")
+local UserInputService = game:GetService("UserInputService")
+
+local Player = Players.LocalPlayer
+local PlayerGui = Player:WaitForChild("PlayerGui")
+
+-- ============================================================
+-- ⚙️ CONFIGURAÇÕES
+-- ============================================================
+
+local MUSIC_ID = "142376088"
+local ROBLOX_IMAGE_ID = "89335981839026"
+
+local DEFAULT_VOLUME = 0.7
+local MAX_VOLUME = 2
+
+local DEFAULT_SPEED = 1
+local MIN_SPEED = 0.5
+local MAX_SPEED = 2
+
+local BAR_COUNT = 32
+
+-- ============================================================
+-- 🧹 LIMPAR VERSÃO ANTIGA
+-- ============================================================
+
+local oldGui = PlayerGui:FindFirstChild("HenriqueMusicPlayer")
+if oldGui then
+	oldGui:Destroy()
+end
+
+local oldSound = workspace:FindFirstChild("HenriqueMusic")
+if oldSound then
+	oldSound:Destroy()
+end
+
+-- ============================================================
+-- 🎵 SOM
+-- ============================================================
+
+local Sound = Instance.new("Sound")
+Sound.Name = "HenriqueMusic"
+Sound.SoundId = "rbxassetid://" .. MUSIC_ID
+Sound.Volume = DEFAULT_VOLUME
+Sound.PlaybackSpeed = DEFAULT_SPEED
+Sound.Looped = false
+Sound.Parent = workspace
+
+-- ============================================================
+-- 📱 GUI
+-- ============================================================
+
+local Gui = Instance.new("ScreenGui")
+Gui.Name = "HenriqueMusicPlayer"
+Gui.ResetOnSpawn = false
+Gui.IgnoreGuiInset = true
+Gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+Gui.Parent = PlayerGui
+
+-- ============================================================
+-- 🎵 BOTÃO FLUTUANTE
+-- ============================================================
+
+local MusicButton = Instance.new("TextButton")
+MusicButton.Size = UDim2.fromOffset(64,64)
+MusicButton.Position = UDim2.new(1,-82,1,-90)
+MusicButton.BackgroundColor3 = Color3.fromRGB(48,48,48)
+MusicButton.BackgroundTransparency = 0.08
+MusicButton.Text = "🎵"
+MusicButton.TextSize = 30
+MusicButton.Font = Enum.Font.GothamBold
+MusicButton.TextColor3 = Color3.new(1,1,1)
+MusicButton.AutoButtonColor = false
+MusicButton.ZIndex = 200
+MusicButton.Parent = Gui
+
+local ButtonCorner = Instance.new("UICorner")
+ButtonCorner.CornerRadius = UDim.new(1,0)
+ButtonCorner.Parent = MusicButton
+
+local ButtonStroke = Instance.new("UIStroke")
+ButtonStroke.Thickness = 2
+ButtonStroke.Color = Color3.new(1,1,1)
+ButtonStroke.Transparency = 0.15
+ButtonStroke.Parent = MusicButton
+
+-- ============================================================
+-- 🖥️ PAINEL PRINCIPAL
+-- ============================================================
+
+local Main = Instance.new("Frame")
+Main.Name = "MusicPanel"
+Main.Size = UDim2.fromScale(1,1)
+Main.Position = UDim2.fromScale(0,1)
+Main.BackgroundColor3 = Color3.fromRGB(20,20,20)
+Main.BorderSizePixel = 0
+Main.Visible = false
+Main.ZIndex = 10
+Main.Parent = Gui
+
+local Background = Instance.new("Frame")
+Background.Size = UDim2.fromScale(1,1)
+Background.BackgroundColor3 = Color3.fromRGB(27,27,27)
+Background.BorderSizePixel = 0
+Background.Parent = Main
+
+-- ============================================================
+-- 🖼️ IMAGEM ROBLOX
+-- ============================================================
+
+local RobloxImage = Instance.new("ImageLabel")
+RobloxImage.Name = "RobloxImage"
+RobloxImage.Size = UDim2.fromOffset(285,285)
+RobloxImage.Position = UDim2.new(1,-255,0,105)
+RobloxImage.BackgroundTransparency = 1
+RobloxImage.Image = "rbxassetid://" .. ROBLOX_IMAGE_ID
+RobloxImage.ScaleType = Enum.ScaleType.Fit
+RobloxImage.Rotation = 0
+RobloxImage.ZIndex = 25
+RobloxImage.Parent = Main
+
+-- ============================================================
+-- 🕐 RELÓGIO
+-- ============================================================
+
+local Clock = Instance.new("TextLabel")
+Clock.Size = UDim2.fromOffset(180,42)
+Clock.Position = UDim2.new(0.5,-90,0,7)
+Clock.BackgroundTransparency = 1
+Clock.Text = "00:00"
+Clock.TextColor3 = Color3.new(1,1,1)
+Clock.TextScaled = true
+Clock.Font = Enum.Font.SciFi
+Clock.ZIndex = 30
+Clock.Parent = Main
+
+-- ============================================================
+-- 🎶 TÍTULO
+-- ============================================================
+
+local TitleBox = Instance.new("Frame")
+TitleBox.Size = UDim2.new(0.60,0,0,72)
+TitleBox.Position = UDim2.new(0.20,0,0,50)
+TitleBox.BackgroundColor3 = Color3.fromRGB(62,62,62)
+TitleBox.BackgroundTransparency = 0.08
+TitleBox.BorderSizePixel = 0
+TitleBox.ZIndex = 20
+TitleBox.Parent = Main
+
+local TitleCorner = Instance.new("UICorner")
+TitleCorner.CornerRadius = UDim.new(0,5)
+TitleCorner.Parent = TitleBox
+
+local Title = Instance.new("TextLabel")
+Title.Size = UDim2.fromScale(1,1)
+Title.BackgroundTransparency = 1
+Title.Text = "Henrique Música Player"
+Title.TextColor3 = Color3.new(1,1,1)
+Title.TextScaled = true
+Title.Font = Enum.Font.SciFi
+Title.ZIndex = 21
+Title.Parent = TitleBox
+
+-- ============================================================
+-- 👤 CRIADOR
+-- ============================================================
+
+local CreatorBox = Instance.new("Frame")
+CreatorBox.Size = UDim2.fromOffset(205,72)
+CreatorBox.Position = UDim2.new(0,22,0,145)
+CreatorBox.BackgroundColor3 = Color3.fromRGB(62,62,62)
+CreatorBox.BackgroundTransparency = 0.08
+CreatorBox.BorderSizePixel = 0
+CreatorBox.ZIndex = 30
+CreatorBox.Parent = Main
+
+local CreatorCorner = Instance.new("UICorner")
+CreatorCorner.CornerRadius = UDim.new(0,4)
+CreatorCorner.Parent = CreatorBox
+
+local CreatorHeader = Instance.new("TextLabel")
+CreatorHeader.Size = UDim2.new(1,0,0,27)
+CreatorHeader.BackgroundColor3 = Color3.fromRGB(52,52,52)
+CreatorHeader.Text = "Criador"
+CreatorHeader.TextColor3 = Color3.new(1,1,1)
+CreatorHeader.TextScaled = true
+CreatorHeader.Font = Enum.Font.SciFi
+CreatorHeader.ZIndex = 31
+CreatorHeader.Parent = CreatorBox
+
+local CreatorName = Instance.new("TextLabel")
+CreatorName.Size = UDim2.new(1,0,1,-27)
+CreatorName.Position = UDim2.new(0,0,0,27)
+CreatorName.BackgroundTransparency = 1
+CreatorName.Text = "Henrique"
+CreatorName.TextColor3 = Color3.new(1,1,1)
+CreatorName.TextScaled = true
+CreatorName.Font = Enum.Font.SciFi
+CreatorName.ZIndex = 31
+CreatorName.Parent = CreatorBox
+
+-- ============================================================
+-- 📊 VISUALIZADOR
+-- ============================================================
+
+local VisualizerBox = Instance.new("Frame")
+VisualizerBox.Size = UDim2.new(0.56,0,0,235)
+VisualizerBox.Position = UDim2.new(0.26,0,0,145)
+VisualizerBox.BackgroundColor3 = Color3.fromRGB(57,57,57)
+VisualizerBox.BackgroundTransparency = 0.08
+VisualizerBox.BorderSizePixel = 0
+VisualizerBox.ZIndex = 20
+VisualizerBox.Parent = Main
+
+local VisualizerCorner = Instance.new("UICorner")
+VisualizerCorner.CornerRadius = UDim.new(0,4)
+VisualizerCorner.Parent = VisualizerBox
+
+local VisualizerInner = Instance.new("Frame")
+VisualizerInner.Size = UDim2.new(1,-26,1,-26)
+VisualizerInner.Position = UDim2.fromOffset(13,13)
+VisualizerInner.BackgroundColor3 = Color3.fromRGB(39,39,39)
+VisualizerInner.BackgroundTransparency = 0.08
+VisualizerInner.BorderSizePixel = 0
+VisualizerInner.ZIndex = 21
+VisualizerInner.Parent = VisualizerBox
+
+local VisualizerInnerCorner = Instance.new("UICorner")
+VisualizerInnerCorner.CornerRadius = UDim.new(0,3)
+VisualizerInnerCorner.Parent = VisualizerInner
+
+local BarHolder = Instance.new("Frame")
+BarHolder.Size = UDim2.new(1,-22,1,-20)
+BarHolder.Position = UDim2.fromOffset(11,10)
+BarHolder.BackgroundTransparency = 1
+BarHolder.ZIndex = 22
+BarHolder.Parent = VisualizerInner
+
+local Layout = Instance.new("UIListLayout")
+Layout.FillDirection = Enum.FillDirection.Horizontal
+Layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+Layout.VerticalAlignment = Enum.VerticalAlignment.Bottom
+Layout.Padding = UDim.new(0,3)
+Layout.Parent = BarHolder
+
+local Bars = {}
+
+for i = 1,BAR_COUNT do
+	local bar = Instance.new("Frame")
+	bar.Name = "Bar_" .. i
+	bar.Size = UDim2.new(1/BAR_COUNT,-4,0.18,0)
+	bar.BackgroundColor3 = Color3.fromRGB(0,255,70)
+	bar.BorderSizePixel = 0
+	bar.ZIndex = 23
+	bar.Parent = BarHolder
+
+	local corner = Instance.new("UICorner")
+	corner.CornerRadius = UDim.new(0,2)
+	corner.Parent = bar
+
+	Bars[i] = bar
+end
+
+-- ============================================================
+-- 🔊 VOLUME
+-- ============================================================
+
+local VolumePanel = Instance.new("Frame")
+VolumePanel.Size = UDim2.fromOffset(205,82)
+VolumePanel.Position = UDim2.new(0,22,0,225)
+VolumePanel.BackgroundColor3 = Color3.fromRGB(62,62,62)
+VolumePanel.BackgroundTransparency = 0.08
+VolumePanel.BorderSizePixel = 0
+VolumePanel.ZIndex = 35
+VolumePanel.Parent = Main
+
+local VolumeCorner = Instance.new("UICorner")
+VolumeCorner.CornerRadius = UDim.new(0,4)
+VolumeCorner.Parent = VolumePanel
+
+local VolumeLabel = Instance.new("TextLabel")
+VolumeLabel.Size = UDim2.new(1,0,0,25)
+VolumeLabel.Position = UDim2.fromOffset(0,3)
+VolumeLabel.BackgroundTransparency = 1
+VolumeLabel.Text = "Volume"
+VolumeLabel.TextColor3 = Color3.new(1,1,1)
+VolumeLabel.TextScaled = true
+VolumeLabel.Font = Enum.Font.SciFi
+VolumeLabel.ZIndex = 36
+VolumeLabel.Parent = VolumePanel
+
+local VolumeBack = Instance.new("Frame")
+VolumeBack.Size = UDim2.new(1,-24,0,18)
+VolumeBack.Position = UDim2.fromOffset(12,43)
+VolumeBack.BackgroundColor3 = Color3.fromRGB(40,40,40)
+VolumeBack.BorderSizePixel = 0
+VolumeBack.ZIndex = 36
+VolumeBack.Parent = VolumePanel
+
+local VolumeBackCorner = Instance.new("UICorner")
+VolumeBackCorner.CornerRadius = UDim.new(0,5)
+VolumeBackCorner.Parent = VolumeBack
+
+local VolumeFill = Instance.new("Frame")
+VolumeFill.Size = UDim2.new(DEFAULT_VOLUME/MAX_VOLUME,0,1,0)
+VolumeFill.BackgroundColor3 = Color3.fromRGB(110,110,110)
+VolumeFill.BorderSizePixel = 0
+VolumeFill.ZIndex = 37
+VolumeFill.Parent = VolumeBack
+
+local VolumeFillCorner = Instance.new("UICorner")
+VolumeFillCorner.CornerRadius = UDim.new(0,5)
+VolumeFillCorner.Parent = VolumeFill
+
+-- ============================================================
+-- ⚡ VELOCIDADE
+-- ============================================================
+
+local SpeedPanel = Instance.new("Frame")
+SpeedPanel.Size = UDim2.fromOffset(205,125)
+SpeedPanel.Position = UDim2.new(0,22,0,315)
+SpeedPanel.BackgroundColor3 = Color3.fromRGB(62,62,62)
+SpeedPanel.BackgroundTransparency = 0.08
+SpeedPanel.BorderSizePixel = 0
+SpeedPanel.ZIndex = 35
+SpeedPanel.Parent = Main
+
+local SpeedCorner = Instance.new("UICorner")
+SpeedCorner.CornerRadius = UDim.new(0,4)
+SpeedCorner.Parent = SpeedPanel
+
+local SpeedLabel = Instance.new("TextLabel")
+SpeedLabel.Size = UDim2.new(1,0,0,27)
+SpeedLabel.Position = UDim2.fromOffset(0,3)
+SpeedLabel.BackgroundTransparency = 1
+SpeedLabel.Text = "Velocidade"
+SpeedLabel.TextColor3 = Color3.new(1,1,1)
+SpeedLabel.TextScaled = true
+SpeedLabel.Font = Enum.Font.SciFi
+SpeedLabel.ZIndex = 36
+SpeedLabel.Parent = SpeedPanel
+
+local SpeedBack = Instance.new("Frame")
+SpeedBack.Size = UDim2.new(1,-30,0,24)
+SpeedBack.Position = UDim2.fromOffset(15,47)
+SpeedBack.BackgroundColor3 = Color3.fromRGB(40,40,40)
+SpeedBack.BorderSizePixel = 0
+SpeedBack.ZIndex = 36
+SpeedBack.Parent = SpeedPanel
+
+local SpeedBackCorner = Instance.new("UICorner")
+SpeedBackCorner.CornerRadius = UDim.new(0,5)
+SpeedBackCorner.Parent = SpeedBack
+
+local SpeedFill = Instance.new("Frame")
+SpeedFill.Size = UDim2.new(0.5,0,1,0)
+SpeedFill.BackgroundColor3 = Color3.fromRGB(105,105,105)
+SpeedFill.BorderSizePixel = 0
+SpeedFill.ZIndex = 37
+SpeedFill.Parent = SpeedBack
+
+local SpeedFillCorner = Instance.new("UICorner")
+SpeedFillCorner.CornerRadius = UDim.new(0,5)
+SpeedFillCorner.Parent = SpeedFill
+
+local SpeedValue = Instance.new("TextLabel")
+SpeedValue.Size = UDim2.new(1,0,0,30)
+SpeedValue.Position = UDim2.fromOffset(0,80)
+SpeedValue.BackgroundTransparency = 1
+SpeedValue.Text = "1.0x"
+SpeedValue.TextColor3 = Color3.new(1,1,1)
+SpeedValue.TextScaled = true
+SpeedValue.Font = Enum.Font.SciFi
+SpeedValue.ZIndex = 36
+SpeedValue.Parent = SpeedPanel
+
+-- ============================================================
+-- 🎶 NOME DA MÚSICA
+-- ============================================================
+
+local SongName = Instance.new("TextLabel")
+SongName.Size = UDim2.new(0.60,0,0,48)
+SongName.Position = UDim2.new(0.20,0,0,390)
+SongName.BackgroundColor3 = Color3.fromRGB(61,61,61)
+SongName.BackgroundTransparency = 0.05
+SongName.Text = "Carregando música..."
+SongName.TextColor3 = Color3.new(1,1,1)
+SongName.TextScaled = true
+SongName.Font = Enum.Font.SciFi
+SongName.ZIndex = 30
+SongName.Parent = Main
+
+local SongCorner = Instance.new("UICorner")
+SongCorner.CornerRadius = UDim.new(0,4)
+SongCorner.Parent = SongName
+
+-- ============================================================
+-- 🎛️ CONTROLES
+-- ============================================================
+
+local Controls = Instance.new("Frame")
+Controls.Size = UDim2.new(0.60,0,0,92)
+Controls.Position = UDim2.new(0.20,0,0,450)
+Controls.BackgroundTransparency = 1
+Controls.ZIndex = 30
+Controls.Parent = Main
+
+local PauseButton = Instance.new("TextButton")
+PauseButton.Size = UDim2.fromOffset(100,82)
+PauseButton.Position = UDim2.fromOffset(0,5)
+PauseButton.BackgroundColor3 = Color3.fromRGB(63,63,63)
+PauseButton.Text = "⏸️"
+PauseButton.TextSize = 39
+PauseButton.Font = Enum.Font.GothamBold
+PauseButton.TextColor3 = Color3.new(1,1,1)
+PauseButton.AutoButtonColor = false
+PauseButton.ZIndex = 31
+PauseButton.Parent = Controls
+
+local LoopButton = Instance.new("TextButton")
+LoopButton.Size = UDim2.fromOffset(100,82)
+LoopButton.Position = UDim2.fromOffset(108,5)
+LoopButton.BackgroundColor3 = Color3.fromRGB(63,63,63)
+LoopButton.Text = "🔁"
+LoopButton.TextSize = 36
+LoopButton.Font = Enum.Font.GothamBold
+LoopButton.TextColor3 = Color3.new(1,1,1)
+LoopButton.AutoButtonColor = false
+LoopButton.ZIndex = 31
+LoopButton.Parent = Controls
+
+local IdBox = Instance.new("TextBox")
+IdBox.Name = "SoundId"
+IdBox.Size = UDim2.new(0.53,0,0,82)
+IdBox.Position = UDim2.new(0.30,0,0,5)
+IdBox.BackgroundColor3 = Color3.fromRGB(63,63,63)
+IdBox.BackgroundTransparency = 0.02
+IdBox.Text = MUSIC_ID
+IdBox.PlaceholderText = "ID do som"
+IdBox.TextColor3 = Color3.new(1,1,1)
+IdBox.PlaceholderColor3 = Color3.fromRGB(190,190,190)
+IdBox.TextScaled = true
+IdBox.Font = Enum.Font.SciFi
+IdBox.ClearTextOnFocus = false
+IdBox.ZIndex = 31
+IdBox.Parent = Controls
+
+-- ============================================================
+-- ⏱️ TEMPO
+-- ============================================================
+
+local TimeBox = Instance.new("Frame")
+TimeBox.Size = UDim2.new(0.22,0,0,72)
+TimeBox.Position = UDim2.new(0.09,0,0,555)
+TimeBox.BackgroundColor3 = Color3.fromRGB(62,62,62)
+TimeBox.BorderSizePixel = 0
+TimeBox.ZIndex = 30
+TimeBox.Parent = Main
+
+local CurrentTime = Instance.new("TextLabel")
+CurrentTime.Size = UDim2.new(0.5,0,1,0)
+CurrentTime.BackgroundTransparency = 1
+CurrentTime.Text = "00:00"
+CurrentTime.TextColor3 = Color3.new(0,0,0)
+CurrentTime.TextScaled = true
+CurrentTime.Font = Enum.Font.SciFi
+CurrentTime.ZIndex = 31
+CurrentTime.Parent = TimeBox
+
+local TotalTime = Instance.new("TextLabel")
+TotalTime.Size = UDim2.new(0.5,0,1,0)
+TotalTime.Position = UDim2.new(0.5,0,0,0)
+TotalTime.BackgroundTransparency = 1
+TotalTime.Text = "00:00"
+TotalTime.TextColor3 = Color3.new(0,0,0)
+TotalTime.TextScaled = true
+TotalTime.Font = Enum.Font.SciFi
+TotalTime.ZIndex = 31
+TotalTime.Parent = TimeBox
+
+local TimeDivider = Instance.new("Frame")
+TimeDivider.Size = UDim2.new(0,2,1,0)
+TimeDivider.Position = UDim2.new(0.5,-1,0,0)
+TimeDivider.BackgroundColor3 = Color3.fromRGB(35,35,35)
+TimeDivider.BorderSizePixel = 0
+TimeDivider.ZIndex = 32
+TimeDivider.Parent = TimeBox
+
+-- ============================================================
+-- 📈 PROGRESSO
+-- ============================================================
+
+local ProgressBack = Instance.new("Frame")
+ProgressBack.Size = UDim2.new(0.62,0,0,78)
+ProgressBack.Position = UDim2.new(0.37,0,0,552)
+ProgressBack.BackgroundColor3 = Color3.fromRGB(65,65,65)
+ProgressBack.BorderSizePixel = 0
+ProgressBack.ZIndex = 30
+ProgressBack.Parent = Main
+
+local Progress = Instance.new("Frame")
+Progress.Size = UDim2.new(0,0,1,0)
+Progress.BackgroundColor3 = Color3.fromRGB(95,95,95)
+Progress.BorderSizePixel = 0
+Progress.ZIndex = 31
+Progress.Parent = ProgressBack
+
+local ProgressHandle = Instance.new("Frame")
+ProgressHandle.Size = UDim2.fromOffset(28,86)
+ProgressHandle.Position = UDim2.new(1,-14,0.5,-43)
+ProgressHandle.BackgroundColor3 = Color3.fromRGB(50,50,50)
+ProgressHandle.BorderSizePixel = 0
+ProgressHandle.ZIndex = 33
+ProgressHandle.Parent = Progress
+
+-- ============================================================
+-- ❌ FECHAR
+-- ============================================================
+
+local CloseButton = Instance.new("TextButton")
+CloseButton.Size = UDim2.fromOffset(62,62)
+CloseButton.Position = UDim2.new(1,-82,0,22)
+CloseButton.BackgroundColor3 = Color3.fromRGB(63,63,63)
+CloseButton.Text = "❌"
+CloseButton.TextSize = 29
+CloseButton.Font = Enum.Font.GothamBold
+CloseButton.TextColor3 = Color3.new(1,1,1)
+CloseButton.AutoButtonColor = false
+CloseButton.ZIndex = 100
+CloseButton.Parent = Main
+
+-- ============================================================
+-- 🔧 FUNÇÕES
+-- ============================================================
+
+local function formatTime(seconds)
+	seconds = math.max(0,math.floor(seconds or 0))
+	local minutes = math.floor(seconds/60)
+	local secs = seconds%60
+	return string.format("%02d:%02d",minutes,secs)
+end
+
+local function getId(text)
+	return tostring(text or ""):match("%d+")
+end
+
+local function press(button)
+	local oldSize = button.Size
+
+	button.Size = UDim2.new(
+		oldSize.X.Scale,
+		oldSize.X.Offset - 6,
+		oldSize.Y.Scale,
+		oldSize.Y.Offset - 6
+	)
+
+	task.delay(0.08,function()
+		if button and button.Parent then
+			button.Size = oldSize
+		end
+	end)
+end
+
+-- ============================================================
+-- 🎶 NOME DA MÚSICA
+-- ============================================================
+
+local function updateSongName()
+
+	local id = getId(IdBox.Text)
+
+	if not id then
+		SongName.Text = "ID inválido"
+		return
+	end
+
+	SongName.Text = "Carregando música..."
+
+	task.spawn(function()
+
+		local success,info = pcall(function()
+			return MarketplaceService:GetProductInfo(
+				tonumber(id),
+				Enum.InfoType.Asset
+			)
+		end)
+
+		if success and info and info.Name then
+			SongName.Text = tostring(info.Name)
+		else
+			SongName.Text = "Música • ID " .. id
+		end
+
+	end)
+end
+
+-- ============================================================
+-- 🔄 TROCAR MÚSICA
+-- ============================================================
+
+local function loadMusic(text)
+
+	local id = getId(text)
+
+	if not id then
+		return
+	end
+
+	Sound:Stop()
+	Sound.SoundId = "rbxassetid://" .. id
+	Sound.TimePosition = 0
+	Sound.Volume = DEFAULT_VOLUME
+	Sound.PlaybackSpeed = DEFAULT_SPEED
+
+	IdBox.Text = id
+	updateSongName()
+
+	task.wait(0.2)
+
+	Sound:Play()
+	PauseButton.Text = "⏸️"
+
+end
+
+-- ============================================================
+-- ⏸️ PLAY / PAUSE
+-- ============================================================
+
+PauseButton.Activated:Connect(function()
+
+	press(PauseButton)
+
+	if Sound.IsPlaying then
+		Sound:Pause()
+		PauseButton.Text = "▶️"
+	else
+		Sound:Resume()
+		PauseButton.Text = "⏸️"
+	end
+
+end)
+
+-- ============================================================
+-- 🔁 LOOP
+-- ============================================================
+
+LoopButton.Activated:Connect(function()
+
+	press(LoopButton)
+
+	Sound.Looped = not Sound.Looped
+
+	if Sound.Looped then
+		LoopButton.Text = "🔂"
+	else
+		LoopButton.Text = "🔁"
+	end
+
+end)
+
+-- ============================================================
+-- 🔢 ENTER NO ID
+-- ============================================================
+
+IdBox.FocusLost:Connect(function(enterPressed)
+
+	if enterPressed then
+		loadMusic(IdBox.Text)
+	end
+
+end)
+
+-- ============================================================
+-- 🖥️ ABRIR
+-- ============================================================
+
+local busy = false
+
+MusicButton.Activated:Connect(function()
+
+	if busy then
+		return
+	end
+
+	busy = true
+
+	MusicButton.Visible = false
+	Main.Visible = true
+	Main.Position = UDim2.fromScale(0,1)
+
+	local tween = TweenService:Create(
+		Main,
+		TweenInfo.new(
+			0.45,
+			Enum.EasingStyle.Quint,
+			Enum.EasingDirection.Out
+		),
+		{
+			Position = UDim2.fromScale(0,0)
+		}
+	)
+
+	tween:Play()
+	tween.Completed:Wait()
+
+	busy = false
+
+end)
+
+-- ============================================================
+-- ❌ FECHAR
+-- ============================================================
+
+CloseButton.Activated:Connect(function()
+
+	if busy then
+		return
+	end
+
+	busy = true
+
+	local tween = TweenService:Create(
+		Main,
+		TweenInfo.new(
+			0.35,
+			Enum.EasingStyle.Quint,
+			Enum.EasingDirection.In
+		),
+		{
+			Position = UDim2.fromScale(0,1)
+		}
+	)
+
+	tween:Play()
+	tween.Completed:Wait()
+
+	Main.Visible = false
+	MusicButton.Visible = true
+
+	busy = false
+
+end)
+
+-- ============================================================
+-- ⚡ VELOCIDADE
+-- ============================================================
+
+local speedDragging = false
+
+local function setSpeed(x)
+
+	local relative = math.clamp(
+		(x-SpeedBack.AbsolutePosition.X) /
+		SpeedBack.AbsoluteSize.X,
+		0,
+		1
+	)
+
+	local speed =
+		MIN_SPEED +
+		((MAX_SPEED-MIN_SPEED)*relative)
+
+	Sound.PlaybackSpeed = speed
+
+	SpeedValue.Text = string.format("%.1fx",speed)
+
+	SpeedFill.Size = UDim2.new(
+		relative,
+		0,
+		1,
+		0
+	)
+
+end
+
+SpeedBack.InputBegan:Connect(function(input)
+
+	if input.UserInputType == Enum.UserInputType.MouseButton1
+		or input.UserInputType == Enum.UserInputType.Touch then
+
+		speedDragging = true
+		setSpeed(input.Position.X)
+
+	end
+
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+
+	if speedDragging then
+
+		if input.UserInputType == Enum.UserInputType.MouseMovement
+			or input.UserInputType == Enum.UserInputType.Touch then
+
+			setSpeed(input.Position.X)
+
+		end
+
+	end
+
+end)
+
+UserInputService.InputEnded:Connect(function(input)
+
+	if input.UserInputType == Enum.UserInputType.MouseButton1
+		or input.UserInputType == Enum.UserInputType.Touch then
+
+		speedDragging = false
+
+	end
+
+end)
+
+-- ============================================================
+-- 🔊 VOLUME
+-- ============================================================
+
+local volumeDragging = false
+
+local function setVolume(x)
+
+	local relative = math.clamp(
+		(x-VolumeBack.AbsolutePosition.X) /
+		VolumeBack.AbsoluteSize.X,
+		0,
+		1
+	)
+
+	Sound.Volume = relative * MAX_VOLUME
+
+	VolumeFill.Size = UDim2.new(
+		relative,
+		0,
+		1,
+		0
+	)
+
+end
+
+VolumeBack.InputBegan:Connect(function(input)
+
+	if input.UserInputType == Enum.UserInputType.MouseButton1
+		or input.UserInputType == Enum.UserInputType.Touch then
+
+		volumeDragging = true
+		setVolume(input.Position.X)
+
+	end
+
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+
+	if volumeDragging then
+
+		if input.UserInputType == Enum.UserInputType.MouseMovement
+			or input.UserInputType == Enum.UserInputType.Touch then
+
+			setVolume(input.Position.X)
+
+		end
+
+	end
+
+end)
+
+UserInputService.InputEnded:Connect(function(input)
+
+	if input.UserInputType == Enum.UserInputType.MouseButton1
+		or input.UserInputType == Enum.UserInputType.Touch then
+
+		volumeDragging = false
+
+	end
+
+end)
+
+-- ============================================================
+-- 📈 BARRA DE PROGRESSO
+-- ============================================================
+
+local progressDragging = false
+
+local function setProgress(x)
+
+	if Sound.TimeLength <= 0 then
+		return
+	end
+
+	local relative = math.clamp(
+		(x-ProgressBack.AbsolutePosition.X) /
+		ProgressBack.AbsoluteSize.X,
+		0,
+		1
+	)
+
+	Sound.TimePosition = Sound.TimeLength * relative
+
+end
+
+ProgressBack.InputBegan:Connect(function(input)
+
+	if input.UserInputType == Enum.UserInputType.MouseButton1
+		or input.UserInputType == Enum.UserInputType.Touch then
+
+		progressDragging = true
+		setProgress(input.Position.X)
+
+	end
+
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+
+	if progressDragging then
+
+		if input.UserInputType == Enum.UserInputType.MouseMovement
+			or input.UserInputType == Enum.UserInputType.Touch then
+
+			setProgress(input.Position.X)
+
+		end
+
+	end
+
+end)
+
+UserInputService.InputEnded:Connect(function(input)
+
+	if input.UserInputType == Enum.UserInputType.MouseButton1
+		or input.UserInputType == Enum.UserInputType.Touch then
+
+		progressDragging = false
+
+	end
+
+end)
+
+-- ============================================================
+-- 🌈 CORES DAS BARRAS
+-- ============================================================
+
+local function getBarColor(index)
+
+	local t = (index-1) / (BAR_COUNT-1)
+
+	local centerBlue = math.sin(t*math.pi)
+
+	local red = math.floor(centerBlue*10)
+	local green = 255
+	local blue = math.floor(30 + centerBlue*220)
+
+	return Color3.fromRGB(red,green,blue)
+
+end
+
+-- ============================================================
+-- 📊 VISUALIZER
+-- ============================================================
+
+local barValues = {}
+local barTargets = {}
+local barSeeds = {}
+
+for i = 1,BAR_COUNT do
+
+	barValues[i] = 0.18
+	barTargets[i] = 0.18
+	barSeeds[i] = (i * 17.371) % 100
+
+end
+
+local visualTime = 0
+
+RunService.RenderStepped:Connect(function(dt)
+
+	visualTime += dt
+
+	Clock.Text = os.date("%H:%M")
+
+	local current = Sound.TimePosition or 0
+	local duration = Sound.TimeLength or 0
+
+	CurrentTime.Text = formatTime(current)
+	TotalTime.Text = formatTime(duration)
+
+	if duration > 0 then
+
+		local percent = math.clamp(
+			current/duration,
+			0,
+			1
+		)
+
+		Progress.Size = UDim2.new(
+			percent,
+			0,
+			1,
+			0
+		)
+
+	else
+
+		Progress.Size = UDim2.fromScale(0,1)
+
+	end
+
+	local loudness = Sound.PlaybackLoudness or 0
+
+	local volumeReference = math.max(
+		Sound.Volume,
+		0.15
+	)
+
+	local audioPower = loudness / volumeReference
+
+	audioPower = math.clamp(
+		audioPower / 420,
+		0,
+		1
+	)
+
+	for i,bar in ipairs(Bars) do
+
+		local seed = barSeeds[i]
+
+		local wave1 = math.sin(
+			visualTime*2.7 + seed
+		)
+
+		local wave2 = math.sin(
+			visualTime*4.1 + seed*1.7
+		)
+
+		local variation =
+			(wave1*0.5 + wave2*0.5)
+
+		variation = (variation+1)/2
+
+		local sensitivity =
+			0.50 + variation*0.70
+
+		local center =
+			math.abs(
+				(i-1) -
+				((BAR_COUNT-1)/2)
+			)
+
+		local centerFactor =
+			1 -
+			(center/((BAR_COUNT-1)/2))*0.18
+
+		local power =
+			audioPower *
+			sensitivity *
+			centerFactor
+
+		local target =
+			0.12 + power*0.80
+
+		target = math.clamp(
+			target,
+			0.12,
+			0.94
+		)
+
+		barTargets[i] = target
+
+		local smoothing
+
+		if audioPower > 0.04 then
+			smoothing = 0.32
+		else
+			smoothing = 0.16
+		end
+
+		barValues[i] =
+			barValues[i] +
+			(barTargets[i]-barValues[i]) *
+			smoothing
+
+		bar.Size = UDim2.new(
+			1/BAR_COUNT,
+			-4,
+			barValues[i],
+			0
+		)
+
+		bar.BackgroundColor3 = getBarColor(i)
+
+	end
+
+end)
+
+-- ============================================================
+-- 🖼️ ANIMAÇÃO DA IMAGEM ROBLOX
+-- Giro lento → volta → tremidinha
+-- ============================================================
+
+local imageAnimationRunning = true
+
+task.spawn(function()
+
+	while imageAnimationRunning and RobloxImage.Parent do
+
+		local rotate1 = TweenService:Create(
+			RobloxImage,
+			TweenInfo.new(
+				2.8,
+				Enum.EasingStyle.Sine,
+				Enum.EasingDirection.InOut
+			),
+			{
+				Rotation = 7
+			}
+		)
+
+		rotate1:Play()
+		rotate1.Completed:Wait()
+
+		if not RobloxImage.Parent then
+			break
+		end
+
+		local rotate2 = TweenService:Create(
+			RobloxImage,
+			TweenInfo.new(
+				2.8,
+				Enum.EasingStyle.Sine,
+				Enum.EasingDirection.InOut
+			),
+			{
+				Rotation = 0
+			}
+		)
+
+		rotate2:Play()
+		rotate2.Completed:Wait()
+
+		if not RobloxImage.Parent then
+			break
+		end
+
+		for i = 1,4 do
+
+			local shakeRight = TweenService:Create(
+				RobloxImage,
+				TweenInfo.new(
+					0.08,
+					Enum.EasingStyle.Linear
+				),
+				{
+					Rotation = 2
+				}
+			)
+
+			shakeRight:Play()
+			shakeRight.Completed:Wait()
+
+			local shakeLeft = TweenService:Create(
+				RobloxImage,
+				TweenInfo.new(
+					0.08,
+					Enum.EasingStyle.Linear
+				),
+				{
+					Rotation = -2
+				}
+			)
+
+			shakeLeft:Play()
+			shakeLeft.Completed:Wait()
+
+		end
+
+		local shakeReturn = TweenService:Create(
+			RobloxImage,
+			TweenInfo.new(
+				0.12,
+				Enum.EasingStyle.Sine,
+				Enum.EasingDirection.Out
+			),
+			{
+				Rotation = 0
+			}
+		)
+
+		shakeReturn:Play()
+		shakeReturn.Completed:Wait()
+
+		task.wait(0.8)
+
+	end
+
+end)
+
+-- ============================================================
+-- 🔄 QUANDO A MÚSICA TERMINAR
+-- ============================================================
+
+Sound.Ended:Connect(function()
+
+	if not Sound.Looped then
+		PauseButton.Text = "▶️"
+	end
+
+end)
+
+-- ============================================================
+-- 🎵 NOME INICIAL
+-- ============================================================
+
+task.spawn(function()
+
+	task.wait(0.8)
+
+	updateSongName()
+
+	task.wait(0.8)
+
+	Sound:Play()
+
+	PauseButton.Text = "⏸️"
+
+end)
