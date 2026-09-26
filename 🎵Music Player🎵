@@ -9,6 +9,7 @@ local TweenService = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
 local MarketplaceService = game:GetService("MarketplaceService")
 local UserInputService = game:GetService("UserInputService")
+local ContentProvider = game:GetService("ContentProvider")
 
 local Player = Players.LocalPlayer
 local PlayerGui = Player:WaitForChild("PlayerGui")
@@ -44,16 +45,31 @@ if oldSound then
 end
 
 -- ============================================================
--- 🎵 SOM
+-- 🎵 SISTEMA DE ÁUDIO
 -- ============================================================
 
-local Sound = Instance.new("Sound")
-Sound.Name = "HenriqueMusic"
-Sound.SoundId = "rbxassetid://" .. MUSIC_ID
-Sound.Volume = DEFAULT_VOLUME
-Sound.PlaybackSpeed = DEFAULT_SPEED
-Sound.Looped = false
-Sound.Parent = workspace
+local Sound
+
+local function createSound(id)
+	
+	if Sound then
+		Sound:Stop()
+		Sound:Destroy()
+		Sound = nil
+	end
+	
+	Sound = Instance.new("Sound")
+	Sound.Name = "HenriqueMusic"
+	Sound.SoundId = "rbxassetid://" .. tostring(id)
+	Sound.Volume = DEFAULT_VOLUME
+	Sound.PlaybackSpeed = DEFAULT_SPEED
+	Sound.Looped = false
+	Sound.Parent = workspace
+	
+	return Sound
+end
+
+createSound(MUSIC_ID)
 
 -- ============================================================
 -- 📱 GUI
@@ -255,6 +271,7 @@ Layout.Parent = BarHolder
 local Bars = {}
 
 for i = 1,BAR_COUNT do
+	
 	local bar = Instance.new("Frame")
 	bar.Name = "Bar_" .. i
 	bar.Size = UDim2.new(1/BAR_COUNT,-4,0.18,0)
@@ -262,11 +279,11 @@ for i = 1,BAR_COUNT do
 	bar.BorderSizePixel = 0
 	bar.ZIndex = 23
 	bar.Parent = BarHolder
-
+	
 	local corner = Instance.new("UICorner")
 	corner.CornerRadius = UDim.new(0,2)
 	corner.Parent = bar
-
+	
 	Bars[i] = bar
 end
 
@@ -555,14 +572,14 @@ end
 
 local function press(button)
 	local oldSize = button.Size
-
+	
 	button.Size = UDim2.new(
 		oldSize.X.Scale,
 		oldSize.X.Offset - 6,
 		oldSize.Y.Scale,
 		oldSize.Y.Offset - 6
 	)
-
+	
 	task.delay(0.08,function()
 		if button and button.Parent then
 			button.Size = oldSize
@@ -604,31 +621,111 @@ local function updateSongName()
 end
 
 -- ============================================================
--- 🔄 TROCAR MÚSICA
+-- 🔄 TROCAR MÚSICA — CORRIGIDO
 -- ============================================================
 
+local changingMusic = false
+
 local function loadMusic(text)
+
+	if changingMusic then
+		return
+	end
 
 	local id = getId(text)
 
 	if not id then
+		SongName.Text = "ID inválido"
 		return
 	end
 
-	Sound:Stop()
-	Sound.SoundId = "rbxassetid://" .. id
-	Sound.TimePosition = 0
-	Sound.Volume = DEFAULT_VOLUME
-	Sound.PlaybackSpeed = DEFAULT_SPEED
+	changingMusic = true
+
+	SongName.Text = "Carregando música..."
+
+	-- Guarda o volume e velocidade atuais
+	local oldVolume = Sound and Sound.Volume or DEFAULT_VOLUME
+	local oldSpeed = Sound and Sound.PlaybackSpeed or DEFAULT_SPEED
+
+	-- Cria um Sound completamente novo
+	local newSound = Instance.new("Sound")
+	newSound.Name = "HenriqueMusic"
+	newSound.SoundId = "rbxassetid://" .. id
+	newSound.Volume = oldVolume
+	newSound.PlaybackSpeed = oldSpeed
+	newSound.Looped = Sound and Sound.Looped or false
+	newSound.Parent = workspace
+
+	local oldSoundReference = Sound
+	Sound = newSound
+
+	-- Carrega o novo áudio
+	local loaded = false
+
+	local connection
+
+	connection = newSound.Loaded:Connect(function()
+		loaded = true
+	end)
+
+	pcall(function()
+		ContentProvider:PreloadAsync({newSound})
+	end)
+
+	local startTime = os.clock()
+
+	while not loaded and not newSound.IsLoaded and os.clock() - startTime < 8 do
+		task.wait(0.1)
+	end
+
+	-- Remove o Sound antigo somente depois
+	-- que o novo já foi preparado.
+	if oldSoundReference and oldSoundReference.Parent then
+		oldSoundReference:Stop()
+		oldSoundReference:Destroy()
+	end
+
+	if connection then
+		connection:Disconnect()
+	end
 
 	IdBox.Text = id
-	updateSongName()
 
-	task.wait(0.2)
+	VolumeFill.Size = UDim2.new(
+		math.clamp(newSound.Volume / MAX_VOLUME,0,1),
+		0,
+		1,
+		0
+	)
 
-	Sound:Play()
+	local speedPercent = math.clamp(
+		(newSound.PlaybackSpeed - MIN_SPEED) /
+		(MAX_SPEED - MIN_SPEED),
+		0,
+		1
+	)
+
+	SpeedFill.Size = UDim2.new(
+		speedPercent,
+		0,
+		1,
+		0
+	)
+
+	SpeedValue.Text = string.format(
+		"%.1fx",
+		newSound.PlaybackSpeed
+	)
+
+	-- Começa o novo áudio
+	newSound.TimePosition = 0
+	newSound:Play()
+
 	PauseButton.Text = "⏸️"
 
+	updateSongName()
+
+	changingMusic = false
 end
 
 -- ============================================================
@@ -640,11 +737,15 @@ PauseButton.Activated:Connect(function()
 	press(PauseButton)
 
 	if Sound.IsPlaying then
+		
 		Sound:Pause()
 		PauseButton.Text = "▶️"
+		
 	else
-		Sound:Resume()
+		
+		Sound:Play()
 		PauseButton.Text = "⏸️"
+		
 	end
 
 end)
